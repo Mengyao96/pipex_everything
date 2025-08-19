@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:56:58 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/19 08:45:44 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/19 21:51:12 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,6 @@ void	child_exe(char **argv, char *cmd, char **envp, int i)
 {
 	char	**curr_cmd;
 	char	*path;
-
-	if (!cmd || !cmd[0])
-		return (fprintf(stderr, "pipex: command not found: \n"), exit(127));
-
 
 	curr_cmd = ft_full_cmd(argv[i + 2]);
 	if (!curr_cmd)
