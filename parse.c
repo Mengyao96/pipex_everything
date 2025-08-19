@@ -6,25 +6,28 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/11 16:27:03 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/17 18:58:44 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/19 09:07:13 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-int	get_fd(char **argv, int fd[2])
+void	get_fd(char **argv, int argc, int fd[2])
 {
-	if (access(argv[1], F_OK) == -1)
-		return (fprintf(stderr, "pipex: input: command not found\n"), exit(0), 0);
-
 	fd[0] = open(argv[1], O_RDONLY);
-	if (fd[0] == -1)
-		return (perror("open"), exit(EXIT_FAILURE), 0);
+	if (fd[0] < 0)
+	{
+		ft_putstr_fd("pipex: ", STDERR_FILENO);
+		ft_putstr_fd(argv[1], STDERR_FILENO);
+		perror(": ");
+		fd[0] = open("/dev/null", O_RDONLY);
+	}
 
-	fd[1] = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (fd[1] == -1)
-		return (perror("open"), exit(EXIT_FAILURE), 0);
-	return (1);
+	fd[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (fd[1] < 0)
+	{
+		perror(argv[argc - 1]);
+	}
 }
 
 char	*get_path(char *path, char *cmd)
@@ -65,43 +68,39 @@ int	get_cmds(char **argv, char **cmds, char **envp)
 	char	*path;
 
 	count = get_counts(argv) - 3; //deduct a.out file1 file2
-	cmds[count--] = NULL; //last element should be NULL
-	while (count >= 0)
-	{
-		cmds[count] = ft_strtrunk(argv[2 + count], ' ');
-		if (cmds[count] == NULL)
-			return (free_array(cmds), fprintf(stderr, "pipex: %s: command not found\n", cmds[count]), exit(127), 0);
-		count--;
-	}
-
 	i = 0;
-	while (i < 2)
+	while (i < count)
 	{
+		cmds[i] = ft_strtrunk(argv[2 + i], ' ');
+		if (ft_strchr(cmds[i], '/'))
+		{
+			if (access(cmds[i], X_OK) == 0)
+				return (1);
+		}
 		path = get_path(ft_getenv(envp), cmds[i]);
 		if (path == NULL)
 			return (0);
-		if (access(path, X_OK) == -1)
-			return (free(path), perror("msg"), exit(EXIT_FAILURE), 0);
 		free(path);
 		i++;
 	}
+	cmds[count] = NULL;
 	return (1);
 }
 
 //malloc
 int	argv_check(char **argv, int fd[2], char ***cmds, char **envp)
 {
-	int		check;
+	int		argc;
 
-	check = get_fd(argv, fd);
-	if (check == 0)
-		return (free(fd), perror("get_fd"), exit(EXIT_FAILURE), 0);
+	argc = get_counts(argv);
+	get_fd(argv, argc, fd);
 
-	*cmds = malloc(sizeof(char *) * (get_counts(argv) - 3 + 1));
+	*cmds = malloc(sizeof(char *) * (argc - 3 + 1));
 	if (*cmds == NULL)
 		return (perror("malloc"), 0);
+
 	if (get_cmds(argv, *cmds, envp) == 0)
-		return (exit(127), 0);
+		return (perror("get_cmds"), free_array(*cmds), 0);
 
 	return (1);
 }

@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:55:07 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/17 18:39:52 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/18 22:10:39 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,24 +28,24 @@ int	main(int argc, char **argv, char **envp)
 {
 	int		fd[2];
 	char	**cmds;
-	int		check;
+	int		exit_code;
 
 	// atexit(leaks);
 	if (argc < 5)
-		return (perror("argc"), exit(EXIT_FAILURE), 0);
+		return (perror("argc"), 0);
 	if (envp == NULL)
-		return (perror("envp"), exit(EXIT_FAILURE), 0);
-
-	check = argv_check(argv, fd, &cmds, envp);
-	if (check == 0)
-		return (free_array(cmds), free(fd), perror("argv_check"), exit(EXIT_FAILURE), 0);
+		return (perror("envp"), 0);
 
 
-	check = run_prcs(argv, envp, fd, cmds);
-	if (check == 0)
+	if (argv_check(argv, fd, &cmds, envp) == 0)
+		return (0);
+
+
+	exit_code = run_prcs(argv, envp, fd, cmds);
+	if (exit_code < 0)
 	{
 		free_array(cmds);
-		return (perror("run_prcs"), exit(EXIT_FAILURE), 0);
+		return (perror("run_prcs"), 0);
 	}
 
 	free_array(cmds);

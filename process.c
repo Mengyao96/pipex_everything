@@ -6,15 +6,20 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:56:58 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/17 19:47:02 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/19 08:45:44 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	child_exe(char **argv, char **envp, int i)
+void	child_exe(char **argv, char *cmd, char **envp, int i)
 {
 	char	**curr_cmd;
+	char	*path;
+
+	if (!cmd || !cmd[0])
+		return (fprintf(stderr, "pipex: command not found: \n"), exit(127));
+
 
 	curr_cmd = ft_full_cmd(argv[i + 2]);
 	if (!curr_cmd)
@@ -22,7 +27,15 @@ void	child_exe(char **argv, char **envp, int i)
 		perror("ft_full_cmd");
 		exit(127);
 	}
-	execve(get_path(ft_getenv(envp), curr_cmd[0]), curr_cmd, envp);
+	if (ft_strchr(curr_cmd[0], '/'))
+	{
+		path = curr_cmd[0];
+	}
+	else
+	{
+		path = get_path(ft_getenv(envp), curr_cmd[0]);
+	}
+	execve(path, curr_cmd, envp);
 	perror("execve");
 	free_array(curr_cmd);
 	if (errno == ENOENT)
@@ -69,6 +82,28 @@ void	parent_pr(int *pre_fd, int *pipes, int i, int total)
 	}
 }
 
+int	wait_for_child(pid_t *pids, int total)
+{
+	int	status;
+	int	exit_code;
+
+	while (total > 0)
+	{
+		waitpid(pids[--total], &status, 0);
+		if (pids[total] == -1)
+		{
+			perror("waitpid");
+			exit(EXIT_FAILURE);
+		}
+		if (WIFEXITED(status))
+			exit_code = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+			exit_code = WTERMSIG(status) + 128;
+
+		}
+	return (exit_code);
+}
+
 
 int	run_prcs(char **argv, char **envp, int fd[2], char **cmds)
 {
@@ -81,14 +116,12 @@ int	run_prcs(char **argv, char **envp, int fd[2], char **cmds)
 	pre_fd = fd[0];
 	i = 0;
 	total = get_counts(cmds);
-	// printf("total = %d\n", total);
 	pids = malloc(sizeof(pid_t) * (total));
 	if (!pids)
 	{
 		perror("malloc");
 		exit(EXIT_FAILURE);
 	}
-
 	while (cmds[i])
 	{
 		if (i < total)
@@ -101,18 +134,16 @@ int	run_prcs(char **argv, char **envp, int fd[2], char **cmds)
 		}
 		else
 			pipes[0] = pipes[1] = -1;
-
 		pids[i] = fork();
 		if (pids[i] == -1)
 		{
 			perror("fork");
 			exit(EXIT_FAILURE);
 		}
-
 		if (pids[i] == 0)
 		{
 			child_pr(i, total, &pre_fd, pipes, fd);
-			child_exe(argv, envp, i);
+			child_exe(argv, cmds[i], envp, i);
 		}
 		else
 			parent_pr(&pre_fd, pipes, i, total);
@@ -120,8 +151,7 @@ int	run_prcs(char **argv, char **envp, int fd[2], char **cmds)
 	}
 	close(fd[0]);
 	close(fd[1]);
-	while (i > 0)
-		waitpid(pids[--i], NULL, 0);
+	i = wait_for_child(pids, total);
 	free(pids);
 	return (1);
 }
