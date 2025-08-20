@@ -6,12 +6,11 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/10 20:57:56 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 11:16:43 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 20:09:21 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
-
 
 char	**ft_default_path(void)
 {
@@ -26,7 +25,6 @@ char	**ft_default_path(void)
 		return (free(default_path), NULL);
 	return (envp);
 }
-
 
 char	*ft_getenv(char **envp)
 {

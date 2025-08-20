@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:56:58 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 19:54:12 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 20:48:05 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 void	child_pr(int i, int *pre_fd, int *pipes, int fd[2])
 {
-
 	if (*pre_fd != STDIN_FILENO)
 	{
 		dup2(*pre_fd, STDIN_FILENO);
@@ -24,14 +23,11 @@ void	child_pr(int i, int *pre_fd, int *pipes, int fd[2])
 		dup2(pipes[1], STDOUT_FILENO);
 	else
 		dup2(fd[1], STDOUT_FILENO);
-
 	if (pipes[0] != -1)
 		close(pipes[0]);
 	if (pipes[1] != -1)
 		close(pipes[1]);
-
 }
-
 
 void	child_exe(char **argv, char **envp, int i)
 {
@@ -51,27 +47,19 @@ void	child_exe(char **argv, char **envp, int i)
 		is_path_malloced = 1;
 	}
 	if (!path)
-	{
-		ft_putstr_fd("pipex: ", 2);
-		ft_putstr_fd(curr_cmd[0], 2);
-		ft_putstr_fd(": command not found\n", 2);
-		free_array(curr_cmd);
-		exit(127);
-	}
+		return (ft_putstr_fd("pipex: ", 2), ft_putstr_fd(curr_cmd[0], 2),
+		ft_putstr_fd(": command not found\n", 2), free_array(curr_cmd),
+		exit(127));
 	execve(path, curr_cmd, envp);
 	perror("execve");
 	if (is_path_malloced)
 		free(path);
 	free_array(curr_cmd);
-	if (errno == ENOENT)
-		exit(127);
-	else
-		exit(126);
+	exit(errno == ENOENT ? 127 : 126);
 }
 
 void	parent_pr(int *pre_fd, int *pipes, int i)
 {
-
 	if (*pre_fd != STDIN_FILENO && *pre_fd != -1)
 	{
 		close(*pre_fd);
@@ -85,32 +73,6 @@ void	parent_pr(int *pre_fd, int *pipes, int i)
 	{
 		*pre_fd = -1;
 	}
-}
-
-int	wait_for_child(pid_t *pids, int total)
-{
-	int	status;
-	int	exit_code;
-	int	i;
-	int	current;
-
-	i = 0;
-	exit_code = 0;
-	while (i < total)
-	{
-		current = waitpid(pids[i], &status, 0);
-		if (current == -1)
-		{
-			perror("waitpid");
-			exit(EXIT_FAILURE);
-		}
-		if (WIFEXITED(status))
-			exit_code = WEXITSTATUS(status);
-		else if (WIFSIGNALED(status))
-			exit_code = WTERMSIG(status);
-		i++;
-	}
-	return (exit_code);
 }
 
 int	run_prcs(char **argv, char **envp, int fd[2], char **cmds)
@@ -139,7 +101,34 @@ int	run_prcs(char **argv, char **envp, int fd[2], char **cmds)
 			parent_pr(&pre_fd, pipes, i);
 		i++;
 	}
-	i = wait_for_child(pids, get_counts(cmds));
-	return (close(fd[0]), close(fd[1]), free(pids), i);
+	return (finish(&pids, get_counts(cmds), fd));
 }
 
+int	finish(pid_t **pids, int total, int fd[2])
+{
+	int	status;
+	int	exit_code;
+	int	i;
+	int	current;
+
+	i = 0;
+	exit_code = 0;
+	while (i < total)
+	{
+		current = waitpid((*pids)[i], &status, 0);
+		if (current == -1)
+		{
+			perror("waitpid");
+			exit(EXIT_FAILURE);
+		}
+		if (WIFEXITED(status))
+			exit_code = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+			exit_code = WTERMSIG(status);
+		i++;
+	}
+	close(fd[0]);
+	close(fd[1]);
+	free(*pids);
+	return (exit_code);
+}

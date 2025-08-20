@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/11 16:27:03 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 20:03:33 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 20:07:27 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,10 +69,9 @@ char	*get_path(char *path, char *cmd)
 	i = 0;
 	while (paths[i])
 	{
-		tmp = ft_strjoin(paths[i], "/");
+		tmp = ft_strjoin(paths[i++], "/");
 		if (tmp == NULL)
 			return (free_array(paths), NULL);
-
 		new_path = ft_strjoin(tmp, cmd);
 		if (new_path == NULL)
 			return (free(tmp), free_array(paths), NULL);
@@ -80,7 +79,6 @@ char	*get_path(char *path, char *cmd)
 		if (access(new_path, X_OK) == 0)
 			return (free_array(paths), new_path);
 		free(new_path);
-		i++;
 	}
 	return(free_array(paths), NULL);
 }

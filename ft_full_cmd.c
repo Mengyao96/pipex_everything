@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/17 12:23:41 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 18:33:53 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 20:29:18 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,35 @@ char	**ft_add_to_array(char **arr, char *str)
 	return (new_arr);
 }
 
+char	*get_double_quote(char *start, char **end, char **pos)
+{
+	char	*parsed_str;
+
+	parsed_str = malloc(sizeof(char) * (ft_strlen(start) + 1));
+	if (!parsed_str)
+		return (NULL);
+	*pos = parsed_str;
+	while (**end && **end != '"')
+	{
+		if (**end == '\\' && *(*end + 1) == '"')
+		{
+			**pos = *(*end + 1);
+			(*pos)++;
+			*end += 2;
+		}
+		else
+		{
+			**pos = **end;
+			(*pos)++;
+			(*end)++;
+		}
+	}
+	if (**end != '"')
+		return (free(parsed_str), NULL);
+	**pos = '\0';
+	return (parsed_str);
+}
+
 char	**handle_quotes(char **args, char **str, char c)
 {
 	char	*start;
@@ -51,33 +80,15 @@ char	**handle_quotes(char **args, char **str, char c)
 		if (!end)
 			return (NULL);
 		parsed_str = ft_substr(start, 0, end - start);
-		if (!parsed_str)
-			return (NULL);
-		*str = end + 1;
 	}
 	else
 	{
 		end = start;
-		parsed_str = malloc(sizeof(char) * (ft_strlen(start) + 1));
-		if (!parsed_str)
-			return (NULL);
-		pos = parsed_str;
-		while (*end && *end != '"')
-		{
-			if (*end == '\\' && *(end + 1) == '"')
-			{
-				*pos++ = *(end + 1);
-				end += 2;
-			}
-			else
-				*pos++ = *end++;
-		}
-		if (*end != '"')
-			return (free(parsed_str), NULL);
-		*pos = '\0';
-		*str = end + 1;
-
+		parsed_str = get_double_quote(start, &end, &pos);
 	}
+	if (!parsed_str)
+		return (NULL);
+	*str = end + 1;
 	args = ft_add_to_array(args, parsed_str);
 	return (args);
 }
@@ -136,12 +147,10 @@ char	**ft_full_cmd(char *str)
 	return (args);
 }
 
-
 // void leaks(void)
 // {
 //  system("leaks a.out");
 // }
-
 
 // int	main()
 // {
@@ -149,7 +158,7 @@ char	**ft_full_cmd(char *str)
 // 	char	*str;
 
 // 	atexit(leaks);
-// 	str =  "grep Now" ;//"awk '{count++} END {print count}'";//./script\"quote.sh";//"echo -g -t 'a \"qu \"plus\" oted\" b'";
+// 	str =  "awk '{count++} END {print count}'";//./script\"quote.sh";
 // 	cmds = ft_full_cmd(str);
 // 	int i = 0;
 // 	while (cmds[i])
