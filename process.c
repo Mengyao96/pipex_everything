@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:56:58 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 18:46:17 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 19:54:12 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ int	wait_for_child(pid_t *pids, int total)
 	int	current;
 
 	i = 0;
+	exit_code = 0;
 	while (i < total)
 	{
 		current = waitpid(pids[i], &status, 0);

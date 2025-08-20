@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/11 16:27:03 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 10:50:36 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 20:03:33 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,11 +42,12 @@ char	**get_cmds(char **argv, int argc)
 	{
 		if (ft_strchr(argv[2 + i], '/'))
 		{
-			cmds[i] = argv[2 + i];
-
+			cmds[i] = ft_strdup(argv[2 + i]);
 		}
 		else
 			cmds[i] = ft_strtrunk(argv[2 + i], ' ');
+		if (cmds[i] == NULL)
+			return (free_array(cmds), perror("ft_strtrunk"), NULL);
 		i++;
 	}
 	cmds[argc - 3] = NULL;
