@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 20:06:58 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/18 18:07:48 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 11:05:10 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,15 @@ char	*ft_strtrunk(char *s, char c);
 void	free_array(char **array);
 char	*get_path(char *path, char *cmd);
 char	*ft_getenv(char **envp);
+
+// parse functions
+void	get_fd(char **argv, int argc, int fd[2]);
+char	**get_cmds(char **argv, int argc);
+char	*get_path(char *path, char *cmd);
+
+// get full commands
+char	**ft_add_to_array(char **arr, char *str);
 char	**ft_full_cmd(char *str);
-int		argv_check(char **argv, int fd[2], char ***cmds, char **envp);
 
 int	run_prcs(char **argv, char **envp, int fd[2], char **cmds);
 int	get_counts(char **cmds);

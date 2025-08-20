@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/17 12:23:41 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/19 23:02:04 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 09:20:25 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,40 +114,16 @@ char	**ft_full_cmd(char *str)
 /* void leaks(void)
 {
  system("leaks a.out");
-} */
+}
 
-/* int	main()
-{
 
-	char	*str = "abcde";
-	char	*a = "a";
-	char	*b = "b";
-
-	atexit(leaks);
-	char	**cmds = malloc(sizeof(char *) * 3);
-	cmds[0] = a;
-	cmds[1] = b;
-	cmds[2] = NULL;
-
-	char **new = ft_add_to_array(cmds, str);
-	int	i = 0;
-	while (new[i])
-	{
-		printf("%s\n", new[i]);
-		i++;
-	}
-	printf("new[%d] = %s\n", i, new[i]);
-	free(new);
-	return (0);
-} */
-
-/* int	main()
+int	main()
 {
 	char	**cmds;
 	char	*str;
 
 	atexit(leaks);
-	str = "awk '{count++} END {print count}'";//./script\"quote.sh";//"echo -g -t 'a \"qu \"plus\" oted\" b'";
+	str =  "grep Now" ;//"awk '{count++} END {print count}'";//./script\"quote.sh";//"echo -g -t 'a \"qu \"plus\" oted\" b'";
 	cmds = ft_full_cmd(str);
 	int i = 0;
 	while (cmds[i])

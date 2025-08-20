@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:55:07 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/18 22:10:39 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 11:18:30 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 
 //./pipex      file1    cmd1    cmd2      file2
 // access : F_OK. R_OK, W_OK. X_OK
-
-
 
 
 void leaks(void)
@@ -32,23 +30,21 @@ int	main(int argc, char **argv, char **envp)
 
 	// atexit(leaks);
 	if (argc < 5)
-		return (perror("argc"), 0);
-	if (envp == NULL)
-		return (perror("envp"), 0);
+		return (perror("argc"), 1);
 
-
-	if (argv_check(argv, fd, &cmds, envp) == 0)
-		return (0);
+	get_fd(argv, argc, fd);
+	cmds = get_cmds(argv, argc);
+	if (!cmds)
+		return (perror("get_cmds"), 1);
 
 
 	exit_code = run_prcs(argv, envp, fd, cmds);
 	if (exit_code < 0)
 	{
 		free_array(cmds);
-		return (perror("run_prcs"), 0);
+		return (perror("run_prcs"), 1);
 	}
 
-	free_array(cmds);
 	return (0);
 }
 

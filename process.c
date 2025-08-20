@@ -6,41 +6,13 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:56:58 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/19 21:51:12 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 11:37:29 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	child_exe(char **argv, char *cmd, char **envp, int i)
-{
-	char	**curr_cmd;
-	char	*path;
-
-	curr_cmd = ft_full_cmd(argv[i + 2]);
-	if (!curr_cmd)
-	{
-		perror("ft_full_cmd");
-		exit(127);
-	}
-	if (ft_strchr(curr_cmd[0], '/'))
-	{
-		path = curr_cmd[0];
-	}
-	else
-	{
-		path = get_path(ft_getenv(envp), curr_cmd[0]);
-	}
-	execve(path, curr_cmd, envp);
-	perror("execve");
-	free_array(curr_cmd);
-	if (errno == ENOENT)
-		exit(127);
-	else
-		exit(126);
-}
-
-void	child_pr(int i, int total, int *pre_fd, int *pipes, int fd[2])
+void	child_pr(int i, int *pre_fd, int *pipes, int fd[2])
 {
 
 	if (*pre_fd != STDIN_FILENO)
@@ -48,7 +20,7 @@ void	child_pr(int i, int total, int *pre_fd, int *pipes, int fd[2])
 		dup2(*pre_fd, STDIN_FILENO);
 		close(*pre_fd);
 	}
-	if (i < total - 1)
+	if (i == 0)
 		dup2(pipes[1], STDOUT_FILENO);
 	else
 		dup2(fd[1], STDOUT_FILENO);
@@ -60,14 +32,42 @@ void	child_pr(int i, int total, int *pre_fd, int *pipes, int fd[2])
 
 }
 
-void	parent_pr(int *pre_fd, int *pipes, int i, int total)
+
+void	child_exe(char **argv, char **envp, int i)
+{
+	char	**curr_cmd;
+	char	*path;
+
+	curr_cmd = ft_full_cmd(argv[i + 2]);
+	if (!curr_cmd)
+		return (perror("ft_full_cmd"), exit(127));
+	if (ft_strchr(curr_cmd[0], '/'))
+		path = curr_cmd[0];
+	else
+		path = get_path(ft_getenv(envp), curr_cmd[0]);
+	if (!path)
+		return (perror("get_path"), free_array(curr_cmd), exit(127));
+	execve(path, curr_cmd, envp);
+	free_array(curr_cmd);
+	if (!ft_strchr(curr_cmd[0], '/'))
+		free(path);
+	perror("execve");
+	if (errno == ENOENT)
+		exit(127);
+	else
+		exit(126);
+}
+
+
+
+void	parent_pr(int *pre_fd, int *pipes, int i)
 {
 
 	if (*pre_fd != STDIN_FILENO && *pre_fd != -1)
 	{
 		close(*pre_fd);
 	}
-	if (i < total - 1)
+	if (i == 0)
 	{
 		close(pipes[1]);
 		*pre_fd = pipes[0];
@@ -82,11 +82,13 @@ int	wait_for_child(pid_t *pids, int total)
 {
 	int	status;
 	int	exit_code;
+	int	i;
 
-	while (total > 0)
+	i = 0;
+	while (i < total)
 	{
-		waitpid(pids[--total], &status, 0);
-		if (pids[total] == -1)
+		waitpid(pids[i], &status, 0);
+		if (pids[i] == -1)
 		{
 			perror("waitpid");
 			exit(EXIT_FAILURE);
@@ -94,9 +96,9 @@ int	wait_for_child(pid_t *pids, int total)
 		if (WIFEXITED(status))
 			exit_code = WEXITSTATUS(status);
 		else if (WIFSIGNALED(status))
-			exit_code = WTERMSIG(status) + 128;
-
-		}
+			exit_code = WTERMSIG(status);
+		i++;
+	}
 	return (exit_code);
 }
 
@@ -104,50 +106,30 @@ int	wait_for_child(pid_t *pids, int total)
 int	run_prcs(char **argv, char **envp, int fd[2], char **cmds)
 {
 	int		pre_fd;
-	int		pipes[] = {-1, -1};
+	int		pipes[2];
 	pid_t	*pids;
 	int		i;
-	int		total;
 
 	pre_fd = fd[0];
 	i = 0;
-	total = get_counts(cmds);
-	pids = malloc(sizeof(pid_t) * (total));
+	pids = malloc(sizeof(pid_t) * get_counts(cmds));
 	if (!pids)
-	{
-		perror("malloc");
-		exit(EXIT_FAILURE);
-	}
+		return (perror("malloc"), -1);
 	while (cmds[i])
 	{
-		if (i < total)
-		{
-			if (pipe(pipes) == -1)
-			{
-				perror("pipe");
-				exit(EXIT_FAILURE);
-			}
-		}
-		else
+		if (pipe(pipes))
 			pipes[0] = pipes[1] = -1;
 		pids[i] = fork();
-		if (pids[i] == -1)
-		{
-			perror("fork");
-			exit(EXIT_FAILURE);
-		}
 		if (pids[i] == 0)
 		{
-			child_pr(i, total, &pre_fd, pipes, fd);
-			child_exe(argv, cmds[i], envp, i);
+			child_pr(i, &pre_fd, pipes, fd);
+			child_exe(argv, envp, i);
 		}
-		else
-			parent_pr(&pre_fd, pipes, i, total);
+		else if (pids[i] > 0)
+			parent_pr(&pre_fd, pipes, i);
 		i++;
 	}
-	close(fd[0]);
-	close(fd[1]);
-	i = wait_for_child(pids, total);
-	free(pids);
-	return (1);
+	i = wait_for_child(pids, get_counts(cmds));
+	return (close(fd[0]), close(fd[1]), free(pids), i);
 }
+

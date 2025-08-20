@@ -17,6 +17,9 @@ $(NAME): $(OBJS)
 	$(MAKE) -C ./libft
 	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
 
+debug: $(SRC) $(LIBFT)
+	$(CC) -g $(SRCS) $(LIBFT) -o $(NAME)
+
 clean :
 	$(MAKE) clean -C ./libft
 	rm -f $(OBJS)

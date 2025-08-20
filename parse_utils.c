@@ -6,18 +6,41 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/10 20:57:56 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/17 11:59:29 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 11:16:43 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
+
+char	**ft_default_path(void)
+{
+	char	*default_path;
+	char	**envp;
+
+	default_path = ft_strdup("PATH=/Users/mezhang/goinfre/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/munki:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands");
+	if (!default_path)
+		return (NULL);
+	envp = ft_add_to_array(NULL, default_path);
+	if (!envp)
+		return (free(default_path), NULL);
+	return (envp);
+}
+
+
 char	*ft_getenv(char **envp)
 {
 	int		i;
 	char	*path;
+	int		is_default;
 
 	i = 0;
+	is_default = 0;
+	if (!envp || !*envp)
+	{
+		envp = ft_default_path();
+		is_default = 1;
+	}
 	while (envp[i])
 	{
 		if (ft_strnstr(envp[i], "PATH=", 5))
@@ -29,6 +52,8 @@ char	*ft_getenv(char **envp)
 		}
 		i++;
 	}
+	if (is_default)
+		free_array(envp);
 	return (NULL);
 }
 
