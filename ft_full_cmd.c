@@ -6,18 +6,11 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/17 12:23:41 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 15:47:33 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 18:33:53 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
-
-//awk '{count++} END {print count}'
-//grep -v \"u y\"
-//echo \"a \\\"quoted\\\" b\"
-//./script"quote.sh
-//./script.sh arg1 \"a b\" 'c d' plain\\ space \"x\\\"y\"
-
 
 char	**ft_add_to_array(char **arr, char *str)
 {
@@ -86,24 +79,33 @@ char	**handle_quotes(char **args, char **str, char c)
 
 	}
 	args = ft_add_to_array(args, parsed_str);
-	if (!args)
-		return (free(parsed_str), NULL);
 	return (args);
 }
 
 char	**handle_normal(char **args, char **str)
 {
-	char	*start;
 	char	*end;
+	char	*pos;
+	char	*parsed_str;
 
-	start = *str;
-	end = start;
-	while (*end && *end != ' ' && *end != '\'' && *end != '\"')
-		end++;
-	args = ft_add_to_array(args, ft_substr(start, 0, end - start));
-	if (!args)
+	end = *str;
+	parsed_str = malloc(sizeof(char) * (ft_strlen(end) + 1));
+	if (!parsed_str)
 		return (NULL);
+	pos = parsed_str;
+	while (*end && *end != ' ')
+	{
+		if (*end == '\\' && *(end + 1))
+		{
+			*pos++ = *(end + 1);
+			end += 2;
+		}
+		else
+			*pos++ = *end++;
+	}
+	*pos = '\0';
 	*str = end;
+	args = ft_add_to_array(args, parsed_str);
 	return (args);
 }
 
