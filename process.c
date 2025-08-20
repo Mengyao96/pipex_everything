@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:56:58 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 11:37:29 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 15:36:23 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,19 @@ void	child_exe(char **argv, char **envp, int i)
 
 	curr_cmd = ft_full_cmd(argv[i + 2]);
 	if (!curr_cmd)
-		return (perror("ft_full_cmd"), exit(127));
+		return (ft_putstr_fd("pipex: malloc failed\n", 2), exit(1));
 	if (ft_strchr(curr_cmd[0], '/'))
 		path = curr_cmd[0];
 	else
 		path = get_path(ft_getenv(envp), curr_cmd[0]);
 	if (!path)
-		return (perror("get_path"), free_array(curr_cmd), exit(127));
+	{
+		ft_putstr_fd("pipex: ", 2);
+		ft_putstr_fd(curr_cmd[0], 2);
+		ft_putstr_fd(": command not found\n", 2);
+		free_array(curr_cmd);
+		exit(127);
+	}
 	execve(path, curr_cmd, envp);
 	free_array(curr_cmd);
 	if (!ft_strchr(curr_cmd[0], '/'))
@@ -83,12 +89,13 @@ int	wait_for_child(pid_t *pids, int total)
 	int	status;
 	int	exit_code;
 	int	i;
+	int	current;
 
 	i = 0;
 	while (i < total)
 	{
-		waitpid(pids[i], &status, 0);
-		if (pids[i] == -1)
+		current = waitpid(pids[i], &status, 0);
+		if (current == -1)
 		{
 			perror("waitpid");
 			exit(EXIT_FAILURE);
@@ -101,7 +108,6 @@ int	wait_for_child(pid_t *pids, int total)
 	}
 	return (exit_code);
 }
-
 
 int	run_prcs(char **argv, char **envp, int fd[2], char **cmds)
 {

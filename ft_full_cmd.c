@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/17 12:23:41 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 09:20:25 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 15:47:33 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,15 +48,46 @@ char	**handle_quotes(char **args, char **str, char c)
 {
 	char	*start;
 	char	*end;
+	char	*pos;
+	char	*parsed_str;
 
 	start = *str + 1;
-	end = ft_strchr(start, c);
-	if (!end)
-		return (NULL);
-	args = ft_add_to_array(args, ft_substr(start, 0, end - start));
+	if (c == '\'')
+	{
+		end = ft_strchr(start, c);
+		if (!end)
+			return (NULL);
+		parsed_str = ft_substr(start, 0, end - start);
+		if (!parsed_str)
+			return (NULL);
+		*str = end + 1;
+	}
+	else
+	{
+		end = start;
+		parsed_str = malloc(sizeof(char) * (ft_strlen(start) + 1));
+		if (!parsed_str)
+			return (NULL);
+		pos = parsed_str;
+		while (*end && *end != '"')
+		{
+			if (*end == '\\' && *(end + 1) == '"')
+			{
+				*pos++ = *(end + 1);
+				end += 2;
+			}
+			else
+				*pos++ = *end++;
+		}
+		if (*end != '"')
+			return (free(parsed_str), NULL);
+		*pos = '\0';
+		*str = end + 1;
+
+	}
+	args = ft_add_to_array(args, parsed_str);
 	if (!args)
-		return (NULL);
-	*str = end + 1;
+		return (free(parsed_str), NULL);
 	return (args);
 }
 
@@ -104,34 +135,27 @@ char	**ft_full_cmd(char *str)
 }
 
 
-// char	**ft_full_cmd(char *str)
+// void leaks(void)
 // {
-
-// 	return (free(segs[0]), free(segs[1]), curr_cmd);
+//  system("leaks a.out");
 // }
 
 
-/* void leaks(void)
-{
- system("leaks a.out");
-}
+// int	main()
+// {
+// 	char	**cmds;
+// 	char	*str;
 
-
-int	main()
-{
-	char	**cmds;
-	char	*str;
-
-	atexit(leaks);
-	str =  "grep Now" ;//"awk '{count++} END {print count}'";//./script\"quote.sh";//"echo -g -t 'a \"qu \"plus\" oted\" b'";
-	cmds = ft_full_cmd(str);
-	int i = 0;
-	while (cmds[i])
-	{
-		printf(">>cmds[%d] = %s\n", i, cmds[i]);
-		i++;
-	}
-	printf(">>>cmds[%d] = %s\n",i, cmds[i]);
-	free_array(cmds);
-	return (0);
-} */
+// 	atexit(leaks);
+// 	str =  "grep Now" ;//"awk '{count++} END {print count}'";//./script\"quote.sh";//"echo -g -t 'a \"qu \"plus\" oted\" b'";
+// 	cmds = ft_full_cmd(str);
+// 	int i = 0;
+// 	while (cmds[i])
+// 	{
+// 		printf(">>cmds[%d] = %s\n", i, cmds[i]);
+// 		i++;
+// 	}
+// 	printf(">>>cmds[%d] = %s\n",i, cmds[i]);
+// 	free_array(cmds);
+// 	return (0);
+// }

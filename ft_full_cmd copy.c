@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/17 12:23:41 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/18 19:59:01 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 15:22:18 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,80 +19,185 @@
 //./script.sh arg1 \"a b\" 'c d' plain\\ space \"x\\\"y\"
 
 
-
-char	**ft_realloc(char **arr, int new_size)
+char	**ft_add_to_array(char **arr, char *str)
 {
 	char	**new_arr;
+	int		counts;
 	int		i;
 
-	new_arr = malloc(sizeof(char *) * (new_size + 1));
+	counts = 0;
+	if (arr)
+		counts = get_counts(arr);
+	new_arr = malloc(sizeof(char *) * (counts + 2));
 	if (!new_arr)
 		return (NULL);
 	i = 0;
-	while (arr[i])
+	while (i < counts)
 	{
 		new_arr[i] = arr[i];
 		i++;
 	}
-	free(arr);
-	new_arr[i] = NULL;
+	new_arr[i] = str;
+	new_arr[i + 1] = NULL;
+	if (arr)
+		free(arr);
 	return (new_arr);
 }
 
-char	*get_quote(char *s)
+char	*get_double_quote(char *start, char ***str)
 {
-	char	*start;
+	char	*parsed_str;
+	char	*pos;
 	char	*end;
-	char	*quote;
-	char	c;
 
-	start = ft_strchr(s, '\"');
-	if (!start || (ft_strchr(s, '\'') && ft_strchr(s, '\'') < start))
-		start = ft_strchr(s, '\'');
-	if (!start)
+	end = start;
+	parsed_str = malloc(sizeof(char) * (ft_strlen(start) + 1));
+	if (!parsed_str)
 		return (NULL);
-	c = *start;
-	end = ft_strrchr(start + 1, c);
-	if (!end)
-		return (NULL);
-	quote = malloc(sizeof(char) * (end - start));
-	if (!quote)
-		return (NULL);
-	ft_strlcpy(quote, start + 1, end - start);
-	return (quote);
+	pos = parsed_str;
+	while (*end && *end != '"')
+	{
+		if (*end == '\\' && *(end + 1) == '"')
+		{
+			*pos++ = *(end + 1);
+			*end += 2;
+		}
+		else
+		{
+			*pos++ = *end++;
+		}
+	}
+	if (*end != '"')
+		return (free(parsed_str), NULL);
+	*pos = '\0';
+	**str = end + 1;
+	return (parsed_str);
 }
 
 
+char	**handle_quotes(char **args, char **str, char c)
+{
+	char	*start;
+	char	*end;
+	char	*parsed_str;
+
+	start = *str + 1;
+	if (c == '\'')
+	{
+		end = ft_strchr(start, c);
+		if (!end)
+			return (NULL);
+		parsed_str = ft_substr(start, 0, end - start);
+		if (!parsed_str)
+			return (NULL);
+		*str = end + 1;
+	}
+	else
+	{
+		parsed_str = get_double_quote(start, &str);
+
+	}
+	args = ft_add_to_array(args, parsed_str);
+	if (!args)
+		return (free(parsed_str), NULL);
+	return (args);
+}
+
+
+/*
+char	**handle_quotes(char **args, char **str, char c)
+{
+	char	*start;
+	char	*end;
+	char	*pos;
+	char	*parsed_str;
+
+	start = *str + 1;
+	if (c == '\'')
+	{
+		end = ft_strchr(start, c);
+		if (!end)
+			return (NULL);
+		parsed_str = ft_substr(start, 0, end - start);
+		if (!parsed_str)
+			return (NULL);
+		*str = end + 1;
+	}
+	else
+	{
+		end = start;
+		parsed_str = malloc(sizeof(char) * (ft_strlen(start) + 1));
+		if (!parsed_str)
+			return (NULL);
+		pos = parsed_str;
+		while (*end && *end != '"')
+		{
+			if (*end == '\\' && *(end + 1) == '"')
+			{
+				*pos++ = *(end + 1);
+				end += 2;
+			}
+			else
+			{
+				*pos++ = *end++;
+			}
+		}
+		if (*end != '"')
+			return (free(parsed_str), NULL);
+		*pos = '\0';
+		*str = end + 1;
+
+	}
+	args = ft_add_to_array(args, parsed_str);
+	if (!args)
+		return (free(parsed_str), NULL);
+	return (args);
+}
+
+ */
+
+
+char	**handle_normal(char **args, char **str)
+{
+	char	*start;
+	char	*end;
+
+	start = *str;
+	end = start;
+	while (*end && *end != ' ' && *end != '\'' && *end != '\"')
+		end++;
+	args = ft_add_to_array(args, ft_substr(start, 0, end - start));
+	if (!args)
+		return (NULL);
+	*str = end;
+	return (args);
+}
+
 char	**ft_full_cmd(char *str)
 {
-	char	**curr_cmd;
-	char	*quote;
-	int		i;
-	char	*segs[2];
+	char	**args;
 
-	i = 0;
-	while (str[i] != '\'' && str[i] != '\"' && str[i] != '\0')
-		i++;
-	segs[0] = ft_substr(str, 0, i);
-	printf("segs[0] = %s\n", segs[0]);
-	segs[1] = ft_substr(str, i, ft_strlen(str) - i);
-	printf("segs[1] = %s\n", segs[1]);
-
-	curr_cmd = ft_split(segs[0], ' ');
-	if (!curr_cmd)
-		return (free(segs[0]), free(segs[1]), NULL);
-	quote = get_quote(segs[1]);
-	i = get_counts(curr_cmd);
-	if (quote)
+	args = NULL;
+	while (*str)
 	{
-		curr_cmd = ft_realloc(curr_cmd, i + 1);
-		if (!curr_cmd)
-			return (free_array(curr_cmd), NULL);
-		curr_cmd[i] = ft_strdup(quote);
-		free(quote);
-		curr_cmd[i + 1] = NULL;
+		while (*str == ' ')
+			str++;
+		if (!*str)
+			break;
+		if (*str == '\'' || *str == '\"')
+		{
+			args = handle_quotes(args, &str, *str);
+			if (!args)
+				return (NULL);
+		}
+		else
+		{
+			args = handle_normal(args, &str);
+			if (!args)
+				return (NULL);
+		}
 	}
-	return (free(segs[0]), free(segs[1]), curr_cmd);
+	return (args);
 }
 
 
@@ -102,22 +207,14 @@ char	**ft_full_cmd(char *str)
 // }
 
 
-
-
 // int	main()
 // {
 // 	char	**cmds;
 // 	char	*str;
 
-
-// 	// atexit(leaks);
-// 	str = "awk "'{count++} END {print count}'"";//./script\"quote.sh";//"echo -g -t 'a \"qu \"plus\" oted\" b'";
+// 	atexit(leaks);
+// 	str =  "grep Now" ;//"awk '{count++} END {print count}'";//./script\"quote.sh";//"echo -g -t 'a \"qu \"plus\" oted\" b'";
 // 	cmds = ft_full_cmd(str);
-// 	if (!cmds)
-// 	{
-// 		perror("ft_full_cmd");
-// 		exit (127);
-// 	}
 // 	int i = 0;
 // 	while (cmds[i])
 // 	{
@@ -128,4 +225,3 @@ char	**ft_full_cmd(char *str)
 // 	free_array(cmds);
 // 	return (0);
 // }
-

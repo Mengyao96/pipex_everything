@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:55:07 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 11:18:30 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 15:57:25 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ int	main(int argc, char **argv, char **envp)
 	if (!cmds)
 		return (perror("get_cmds"), 1);
 
-
 	exit_code = run_prcs(argv, envp, fd, cmds);
 	if (exit_code < 0)
 	{
@@ -45,6 +44,7 @@ int	main(int argc, char **argv, char **envp)
 		return (perror("run_prcs"), 1);
 	}
 
-	return (0);
+	// free_array(cmds); // 这里uncomment，paco就会有内存方面的问题。但是comment的话，是泄漏的。
+	return (exit_code);
 }
 
