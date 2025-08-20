@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 20:06:58 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 20:44:48 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 21:24:35 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,9 @@ char	**ft_add_to_array(char **arr, char *str);
 char	**ft_full_cmd(char *str);
 
 // process functions
-int	run_prcs(char **argv, char **envp, int fd[2], char **cmds);
-int	finish(pid_t **pids, int total, int fd[2]);
+int		run_prcs(char **argv, char **envp, int fd[2], char **cmds);
+int		finish(pid_t **pids, int total, int fd[2]);
+void	cmd_false_exit(void);
+void	init_pipes(int pipes[2]);
 
 #endif

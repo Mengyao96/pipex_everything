@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/17 12:23:41 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 20:29:18 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 20:49:33 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ char	**ft_full_cmd(char *str)
 		while (*str == ' ')
 			str++;
 		if (!*str)
-			break;
+			break ;
 		if (*str == '\'' || *str == '\"')
 		{
 			args = handle_quotes(args, &str, *str);

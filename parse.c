@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/11 16:27:03 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 20:07:27 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 20:50:54 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ void	get_fd(char **argv, int argc, int fd[2])
 		perror("pipex: input");
 		fd[0] = open("/dev/null", O_RDONLY);
 	}
-
 	fd[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd[1] < 0)
 	{
@@ -80,6 +79,5 @@ char	*get_path(char *path, char *cmd)
 			return (free_array(paths), new_path);
 		free(new_path);
 	}
-	return(free_array(paths), NULL);
+	return (free_array(paths), NULL);
 }
-

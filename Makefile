@@ -8,6 +8,7 @@ SRCS = main.c \
 		parse_utils.c \
 		ft_full_cmd.c \
 		process.c \
+		process_utils.c \
 
 OBJS = $(SRCS:.c=.o)
 

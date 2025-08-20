@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/10 20:57:56 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 20:09:21 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 20:55:21 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,10 @@ char	**ft_default_path(void)
 	char	*default_path;
 	char	**envp;
 
-	default_path = ft_strdup("PATH=/Users/mezhang/goinfre/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/munki:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands");
+	default_path = ft_strdup("PATH=/Users/mezhang/goinfre/homebrew/bin:/usr/\
+		local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/munki:/Library/\
+		Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current\
+		Commands");
 	if (!default_path)
 		return (NULL);
 	envp = ft_add_to_array(NULL, default_path);
@@ -69,7 +72,7 @@ char	*ft_strtrunk(char *s, char c)
 		if (res[i] == c)
 		{
 			res[i] = '\0';
-			break;
+			break ;
 		}
 		i++;
 	}

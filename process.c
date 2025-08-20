@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:56:58 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 20:48:05 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 21:26:26 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,14 +48,14 @@ void	child_exe(char **argv, char **envp, int i)
 	}
 	if (!path)
 		return (ft_putstr_fd("pipex: ", 2), ft_putstr_fd(curr_cmd[0], 2),
-		ft_putstr_fd(": command not found\n", 2), free_array(curr_cmd),
-		exit(127));
+			ft_putstr_fd(": command not found\n", 2), free_array(curr_cmd),
+			exit(127));
 	execve(path, curr_cmd, envp);
 	perror("execve");
 	if (is_path_malloced)
 		free(path);
 	free_array(curr_cmd);
-	exit(errno == ENOENT ? 127 : 126);
+	cmd_false_exit();
 }
 
 void	parent_pr(int *pre_fd, int *pipes, int i)
@@ -90,7 +90,7 @@ int	run_prcs(char **argv, char **envp, int fd[2], char **cmds)
 	while (cmds[i])
 	{
 		if (pipe(pipes))
-			pipes[0] = pipes[1] = -1;
+			init_pipes(pipes);
 		pids[i] = fork();
 		if (pids[i] == 0)
 		{
