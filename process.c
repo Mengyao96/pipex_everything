@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:56:58 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 15:36:23 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 18:46:17 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,14 +37,19 @@ void	child_exe(char **argv, char **envp, int i)
 {
 	char	**curr_cmd;
 	char	*path;
+	int		is_path_malloced;
 
 	curr_cmd = ft_full_cmd(argv[i + 2]);
 	if (!curr_cmd)
 		return (ft_putstr_fd("pipex: malloc failed\n", 2), exit(1));
+	is_path_malloced = 0;
 	if (ft_strchr(curr_cmd[0], '/'))
 		path = curr_cmd[0];
 	else
+	{
 		path = get_path(ft_getenv(envp), curr_cmd[0]);
+		is_path_malloced = 1;
+	}
 	if (!path)
 	{
 		ft_putstr_fd("pipex: ", 2);
@@ -54,17 +59,15 @@ void	child_exe(char **argv, char **envp, int i)
 		exit(127);
 	}
 	execve(path, curr_cmd, envp);
-	free_array(curr_cmd);
-	if (!ft_strchr(curr_cmd[0], '/'))
-		free(path);
 	perror("execve");
+	if (is_path_malloced)
+		free(path);
+	free_array(curr_cmd);
 	if (errno == ENOENT)
 		exit(127);
 	else
 		exit(126);
 }
-
-
 
 void	parent_pr(int *pre_fd, int *pipes, int i)
 {

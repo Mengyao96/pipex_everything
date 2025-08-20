@@ -6,7 +6,7 @@
 /*   By: mezhang <mezhang@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/09 22:55:07 by mezhang           #+#    #+#             */
-/*   Updated: 2025/08/20 18:31:32 by mezhang          ###   ########.fr       */
+/*   Updated: 2025/08/20 18:46:33 by mezhang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,13 +28,9 @@ int	main(int argc, char **argv, char **envp)
 	char	**cmds;
 	int		exit_code;
 
-	// atexit(leaks);
+	atexit(leaks);
 	if (argc < 5)
 		return (perror("argc"), 1);
-
-	// cmds = ft_full_cmd(argv[2]);
-	// if (!cmds)
-	// 	return (perror("ft_full_cmd"), 1);
 
 	get_fd(argv, argc, fd);
 	cmds = get_cmds(argv, argc);
